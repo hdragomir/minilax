@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+<head>
+<title>minilax</title>
+<meta name=viewport content="width=device-width, initial-scale=1" >
+<style>
+
+html, body {
+  font: 100%/1.5 'Georgia', serif normal;
+  margin: 0;
+}
+
+.minilax-target {
+  transition: 0.2s all;
+}
+
+.wrap {
+  max-width: 48em;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 0 1em;
+}
+
+.wrapped-title {
+  text-align: center;
+  font-weight: normal;
+  letter-spacing: 0.03em;
+  text-shadow: 0 0.08em 0.1em rgba(0, 0, 0, 0.4);
+}
+
+.full-on {
+  width: 100%;
+  position: relative;
+  padding-top: 10em;
+  padding-bottom: 1em;
+  background: #C94A00;
+  color: #ededed;
+  margin: 0;
+}
+
+.copy > p:first-child {
+  font-size: 1.1em;
+}
+
+</style>
+</head>
+<body>
+<figure class="full-on">
+  <div id="wrap" class="wrap">
+    <h1 class="wrapped-title minilax-target">The thing with parallax libraries is that they're just too ... in your face; y'know?!</h1>
+  </div>
+</figure>
+<div class="wrap copy minilax-target">
+  <p>Parallax is a displacement or difference in the apparent position of an object viewed along two different lines of sight, and is measured by the angle or semi-angle of inclination between those two lines.
+  <p>Astronomers use the principle of parallax to measure distances to celestial objects including to the Moon, the Sun, and to stars beyond the Solar System. For example, the Hipparcos satellite took measurements for over 100,000 nearby stars. This provides a basis for other distance measurements in astronomy, the cosmic distance ladder. Here, the term "parallax" is the angle or semi-angle of inclination between two sight-lines to the star.
+  <p>Parallax also affects optical instruments such as rifle scopes, binoculars, microscopes, and twin-lens reflex cameras that view objects from slightly different angles. Many animals, including humans, have two eyes with overlapping visual fields that use parallax to gain depth perception; this process is known as stereopsis. In computer vision the effect is used for computer stereo vision, and there is a device called a parallax rangefinder that uses it to find range, and in some variations also altitude to a target.
+  <p>A simple everyday example of parallax can be seen in the dashboard of motor vehicles that use a needle-style speedometer gauge. When viewed from directly in front, the speed may show exactly 60; but when viewed from the passenger seat the needle may appear to show a slightly different speed, due to the angle of viewing.
+</div>
+
+<script>
+
+(function ($) {
+  "use strict";
+  var lastOrientation = {},
+    stopped = true,
+    arrayForEach = [].forEach;
+
+  function normaliseOrientation(orientation) {
+    var normalised = { x: 0, y: 0 },
+      tampered = {
+        gamma: orientation.gamma / 180,
+        beta: orientation.beta / 180
+      };
+
+    switch (window.orientation) {
+      //landscape
+      case 90: case -90:
+        normalised.x = tampered.beta * window.orientation / 90;
+        normalised.y = tampered.gamma * window.orientation / -90;
+        break;
+      //portrait
+      default:
+        //orientation is 180 for upside down
+        var factor = (window.orientation === 0 ? 1 : -1);
+        normalised.x = tampered.gamma * factor;
+        normalised.y = tampered.beta * factor;
+    }
+    // if you'r rather use percentages
+    normalised.px = normalised.x * 200;
+    normalised.py = normalised.y * 200;
+
+    return normalised;
+  }
+
+  function adjustTransform(orientation) {
+    return function (o, e) {
+      e.style.webkitTransform = e.style.mozTransform = e.style.msTransform = e.style.transform =
+      'translate3d(' + o.x * 2 + 'em, ' + o.y + 'em, 0)';
+    }.bind(null, normaliseOrientation(orientation));
+  }
+
+  function getLaxables () {
+    return document.getElementsByClassName('minilax-target');
+  }
+
+  function onDeviceOrientationChange (ev) {
+    lastOrientation.gamma = ev.gamma;
+    lastOrientation.beta = ev.beta;
+  }
+
+  function render() {
+    if ( typeof lastOrientation.gamma !== 'undefined') {
+      arrayForEach.call(getLaxables(), adjustTransform(lastOrientation));
+    }
+  }
+
+  function start () {
+    stopped = false;
+    window.addEventListener('deviceorientation', onDeviceOrientationChange, false);
+    var looper = function(timestamp) {
+      render();
+      if (!stopped) {
+        requestAnimationFrame(looper);
+      }
+    }
+    requestAnimationFrame(looper);
+  }
+
+  function stop () {
+    stopped = true;
+    lastOrientation = {};
+  }
+
+  $.start = start;
+  $.stop = stop;
+
+} (window.minilax = {}));
+
+document.addEventListener('DOMContentLoaded', function (ev) {
+  "use strict";
+
+  minilax.start();
+
+}, false);
+
+</script>
+
+</body>
+</html>
