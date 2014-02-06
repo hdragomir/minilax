@@ -6,10 +6,7 @@
 
   function normaliseOrientation(orientation) {
     var normalised = { x: 0, y: 0 },
-      tampered = {
-        gamma: orientation.gamma / 180,
-        beta: orientation.beta / 180
-      };
+      tampered = { gamma: orientation.gamma / 180, beta: orientation.beta / 180 };
 
     switch (window.orientation) {
       //landscape
@@ -24,10 +21,6 @@
         normalised.x = tampered.gamma * factor;
         normalised.y = tampered.beta * factor;
     }
-    // if you'r rather use percentages
-    normalised.px = normalised.x * 200;
-    normalised.py = normalised.y * 200;
-
     return normalised;
   }
 
@@ -35,11 +28,7 @@
     return function (o, e) {
       e.style.webkitTransform = e.style.mozTransform = e.style.msTransform = e.style.transform =
       'translate3d(' + o.x * 2 + 'em, ' + o.y + 'em, 0)';
-    }.bind(null, normaliseOrientation(orientation));
-  }
-
-  function getLaxables () {
-    return document.getElementsByClassName('minilax-target');
+    }.bind(null, orientation);
   }
 
   function onDeviceOrientationChange (ev) {
@@ -47,17 +36,14 @@
     lastOrientation.beta = ev.beta;
   }
 
-  function render() {
-    if ( typeof lastOrientation.gamma !== 'undefined') {
-      arrayForEach.call(getLaxables(), adjustTransform(lastOrientation));
-    }
-  }
-
   function start () {
     stopped = false;
     window.addEventListener('deviceorientation', onDeviceOrientationChange, false);
     var looper = function(timestamp) {
-      render();
+      if (typeof lastOrientation.gamma !== 'undefined') {
+        arrayForEach.call(document.getElementsByClassName('minilax-target'),
+          adjustTransform(normaliseOrientation(lastOrientation)));
+      }
       if (!stopped) {
         requestAnimationFrame(looper);
       }
@@ -68,6 +54,7 @@
   function stop () {
     stopped = true;
     lastOrientation = {};
+    window.removeEventListener('deviceorientation', onDeviceOrientationChange, false);
   }
 
   $.start = start;
