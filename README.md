@@ -1,4 +1,4 @@
-# A very simple, subtle parralax effect
+# A lightweight, subtle parralax effect
 
 ```
 minilax.start();
