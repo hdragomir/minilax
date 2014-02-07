@@ -46,6 +46,7 @@ html, body {
 </head>
 <body>
 <figure class="full-on">
+  <div id="log"></div>
   <div id="wrap" class="wrap">
     <h1 class="wrapped-title minilax-target">The thing with parallax libraries is that they're just too ... in your face; y'know?!</h1>
   </div>
@@ -60,8 +61,14 @@ html, body {
 <script src=minilax.js></script>
 <script>
 
+function log(str) {
+  document.getElementById('log').innerHTML = str;
+}
+
 document.addEventListener('DOMContentLoaded', function (ev) {
   "use strict";
+
+
 
   minilax.start();
 

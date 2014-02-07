@@ -6,7 +6,14 @@
 
   function normaliseOrientation(orientation) {
     var normalised = { x: 0, y: 0 },
-      tampered = { gamma: orientation.gamma / 180, beta: orientation.beta / 180 };
+      tampered = {
+        gamma:
+         (Math.abs(orientation.gamma) > 90 ?
+          ((180 - Math.abs(orientation.gamma)) * (orientation.gamma > 0 ? 1 : -1))
+          : orientation.gamma)
+         / 180,
+        beta: orientation.beta / 180
+      };
 
     switch (window.orientation) {
       //landscape
@@ -21,13 +28,14 @@
         normalised.x = tampered.gamma * factor;
         normalised.y = tampered.beta * factor;
     }
+
     return normalised;
   }
 
   function adjustTransform(orientation) {
     return function (o, e) {
       e.style.webkitTransform = e.style.mozTransform = e.style.msTransform = e.style.transform =
-      'translate3d(' + o.x * 2 + 'em, ' + o.y + 'em, 0)';
+      'translate3d(' + o.x + 'em, ' + o.y + 'em, 0)';
     }.bind(null, orientation);
   }
 
